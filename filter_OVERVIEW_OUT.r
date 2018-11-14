@@ -3,6 +3,7 @@
 ### datos del archivo OVERVIEW.OUT de DSSAT   #####
 ###################################################
 rm(list=ls())
+setwd("D:/Sean/Trabajo/Fontar")
 ####
 library(stringr)
 library(Dasst)
@@ -15,7 +16,7 @@ text=readLines(file.choose())
 #### genero una tabla de indices para ubicar la tabla que necesito
 table_index=data.frame(index=seq(1,length(text),1),TITLE=FALSE,TABLE_START=FALSE,TABLE_END=FALSE)
 #### genero los titulos de salida que necesito
-ROW_TITLE=c("DAY","MONTH","CROP AGE","GROWTH STAGE","BIOMASS kg/ha","LAI","LEAF NUM","CROP N kg/ha","STRESS %H2O","STRESS Nitr","STRESS Phos1","STRESS Phos2","RSTG")
+ROW_TITLE=c("DAY","MONTH","CROP AGE","GROWTH STAGE","BIOMASS kg/ha","LAI","LEAF NUM","CROP N kg/ha","N%","STRESS %H2O","STRESS Nitr","STRESS Phos1","STRESS Phos2","RSTG")
 
 ##### busco las tablas a lo largo de OVERVIEW.OUT y remuevo las lineas que no necesito
 for(i in 1:length(text)){
@@ -28,7 +29,7 @@ for(i in 1:length(text)){
   if(str_detect(string=text[i],pattern="\\*\\*\\* SIMULATION ABORTED\\, ERROR CODE  29 \\*\\*\\*")){text[i]=""}
   if(str_detect(string=text[i],pattern="See Warning.OUT file for additional information.")){text[i]=""}
   if(str_detect(string=text[i],pattern="\\*\\*\\*\\*\\*\\*\\*\\*\\*\\*")){text[i]=""}
-  
+  if(str_detect(string=text[i],pattern="^\\*")){text[i]=""}
   
 }
 ##### genero vectores de inicio y fin de cada tabla
@@ -54,7 +55,7 @@ OUT_TEXT=gsub("^\\;", " 0",OUT_TEXT)
 ### exporto el texto como txt
 writeLines(OUT_TEXT,"TESTEO_SALIDA_TABLE.csv")
 ###reimporto el dataframe desde el csv
-tabla_df=read.csv(file="TESTEO_SALIDA_TABLE.csv",sep=";",stringsAsFactors=FALSE)
+tabla_df=read.csv(file="TESTEO_SALIDA_TABLE.csv",sep=";",stringsAsFactors=FALSE,header=FALSE)
 names(tabla_df)=seq(1,ncol(tabla_df),1)
 #### separo las columnas que necesito separar
 tabla_df=separate(tabla_df,col="1",into=c("1","13"),sep = "\\b\\s\\b",remove=FALSE)
@@ -75,6 +76,6 @@ tabla_df=tabla_df[tabla_df$`4`!="Start Sim",]
 ##### renombro las col con ROW_TITLE
 names(tabla_df)=ROW_TITLE
 ##### remuevo las col que no son necesarias
-tabla_df=tabla_df[,-c(11,12,13,14)]
+tabla_df=tabla_df[,-c(12,13)]
 ##### exporto los datos a un archivo csv
 write.csv(tabla_df,file="OVERVIEW_OUT_FILTRADO.csv",col.names=TRUE)
